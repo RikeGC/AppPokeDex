@@ -1,5 +1,5 @@
 {
-  "name": "app-pokedex-pwa",
+  "name": "app-pokedex-rgc",
   "version": "1.0.0",
   "private": true,
   "description": "React PWA para consultar jogos oficiais, Pokémon disponíveis, evoluções e moves.",

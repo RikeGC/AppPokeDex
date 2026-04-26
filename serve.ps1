@@ -4,7 +4,7 @@ $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $listener = [System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Loopback, 8080)
 $listener.Start()
 
-Write-Host 'Pokedex PWA em http://localhost:8080/'
+Write-Host 'Pokedex RGC em http://localhost:8080/'
 
 function Send-Response {
   param(

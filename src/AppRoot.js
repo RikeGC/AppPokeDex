@@ -10,9 +10,11 @@ import {
 } from './api/offlineDb.js';
 import { cacheAssets, deleteCachedAssets } from './api/assetsCache.js';
 import { coverForGame } from './data/gameCovers.js';
+import { AllPokemonView } from './components/AllPokemonView.js';
 import { DetailsView } from './components/DetailsView.js';
 import { GamesView } from './components/GamesView.js';
 import { Header } from './components/Header.js';
+import { HomeView } from './components/HomeView.js';
 import { PokemonView } from './components/PokemonView.js';
 import { formatName, idFromUrl, spriteForSpecies } from './utils/format.js';
 import {
@@ -22,13 +24,15 @@ import {
 } from './utils/pokemonData.js';
 
 export function AppRoot() {
-  const [screen, setScreen] = useState('games');
+  const [screen, setScreen] = useState('home');
   const [games, setGames] = useState([]);
   const [selectedGame, setSelectedGame] = useState(null);
   const [versionGroup, setVersionGroup] = useState(null);
   const [dexMode, setDexMode] = useState('regional');
   const [regionalPokemonList, setRegionalPokemonList] = useState([]);
   const [nationalPokemonList, setNationalPokemonList] = useState([]);
+  const [allPokemonList, setAllPokemonList] = useState([]);
+  const [allPokemonTotal, setAllPokemonTotal] = useState(0);
   const [pokemonList, setPokemonList] = useState([]);
   const [selectedPokemon, setSelectedPokemon] = useState(null);
   const [pokemonDetails, setPokemonDetails] = useState(null);
@@ -43,6 +47,7 @@ export function AppRoot() {
 
   useEffect(() => {
     loadGames();
+    loadPokemonTotal();
 
     const handleInstallPrompt = (event) => {
       event.preventDefault();
@@ -75,6 +80,10 @@ export function AppRoot() {
     refreshOfflinePackage(selectedGame, dexMode);
   }, [selectedGame, dexMode, screen, pokemonList.length]);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+  }, [screen, selectedGame?.name, selectedPokemon?.name]);
+
   async function loadGames() {
     setLoading('Carregando jogos oficiais...');
     setError('');
@@ -88,6 +97,55 @@ export function AppRoot() {
           cover: coverForGame(game.name)
         }))
         .sort((a, b) => a.id - b.id));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading('');
+    }
+  }
+
+  async function loadPokemonTotal() {
+    try {
+      const data = await apiGet('/pokemon-species?limit=1');
+      setAllPokemonTotal(data.count || 0);
+    } catch (err) {
+      setAllPokemonTotal(0);
+    }
+  }
+
+  async function openAllPokemon() {
+    setSelectedGame(null);
+    setVersionGroup(null);
+    setDexMode('national');
+    setSelectedPokemon(null);
+    setPokemonDetails(null);
+    setQuery('');
+    setOfflineMessage('');
+    setOfflinePackage(null);
+    setOfflineProgress(null);
+    setScreen('all-pokemon');
+    setError('');
+
+    if (allPokemonList.length > 0) return;
+
+    setLoading('Carregando lista completa de Pokémon...');
+    try {
+      const data = await apiGet('/pokemon-species?limit=2000');
+      setAllPokemonTotal(data.count || 0);
+      const list = data.results
+        .map((species) => {
+          const id = idFromUrl(species.url);
+          return {
+            id,
+            name: species.name,
+            label: formatName(species.name),
+            entryNumber: id,
+            speciesUrl: species.url
+          };
+        })
+        .filter((pokemon) => Number.isFinite(pokemon.id))
+        .sort((a, b) => a.id - b.id);
+      setAllPokemonList(list);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -184,11 +242,10 @@ export function AppRoot() {
       const species = await apiGet(pokemon.speciesUrl);
       const pokemonData = await apiGet(`/pokemon/${species.name}`);
       const evolutionChain = await apiGet(species.evolution_chain.url);
-      const moves = extractMovesForVersionGroup(pokemonData.moves, versionGroup.name);
-      const encounters = extractEncountersForVersion(
-        await apiGet(pokemonData.location_area_encounters),
-        selectedGame.name
-      );
+      const moves = versionGroup ? extractMovesForVersionGroup(pokemonData.moves, versionGroup.name) : [];
+      const encounters = selectedGame
+        ? extractEncountersForVersion(await apiGet(pokemonData.location_area_encounters), selectedGame.name)
+        : [];
       setPokemonDetails({ species, pokemon: pokemonData, evolutionChain, moves, encounters });
     } catch (err) {
       setError(err.message);
@@ -303,14 +360,36 @@ export function AppRoot() {
     return pokemonList.filter((pokemon) => pokemon.label.toLowerCase().includes(normalized) || pokemon.name.includes(normalized));
   }, [pokemonList, query]);
 
+  const filteredAllPokemon = useMemo(() => {
+    const normalized = query.trim().toLowerCase();
+    if (!normalized) return allPokemonList;
+    return allPokemonList.filter((pokemon) => pokemon.label.toLowerCase().includes(normalized) || pokemon.name.includes(normalized));
+  }, [allPokemonList, query]);
+
   function goBack() {
     if (screen === 'details') {
-      setScreen('pokemon');
+      setScreen(selectedGame ? 'pokemon' : 'all-pokemon');
       return;
     }
     if (screen === 'pokemon') {
       setScreen('games');
+      return;
     }
+    if (screen === 'all-pokemon' || screen === 'games') {
+      setScreen('home');
+    }
+  }
+
+  function goHome() {
+    setSelectedGame(null);
+    setVersionGroup(null);
+    setSelectedPokemon(null);
+    setPokemonDetails(null);
+    setQuery('');
+    setOfflineMessage('');
+    setOfflinePackage(null);
+    setOfflineProgress(null);
+    setScreen('home');
   }
 
   return h('main', { className: 'app-shell' },
@@ -322,13 +401,32 @@ export function AppRoot() {
       theme,
       onThemeToggle: () => setTheme((current) => current === 'dark' ? 'light' : 'dark'),
       onInstall: installApp,
-      onHome: () => setScreen('games'),
+      onHome: goHome,
       onBack: goBack,
       onBackToPokemon: () => setScreen('pokemon')
     }),
     error && h('section', { className: 'status error' }, error),
     loading && h('section', { className: 'status' }, loading),
+    screen === 'home' && h(HomeView, {
+      gamesCount: games.length,
+      allPokemonCount: allPokemonTotal || allPokemonList.length,
+      onOpenAllPokemon: openAllPokemon,
+      onOpenGames: () => {
+        setSelectedGame(null);
+        setSelectedPokemon(null);
+        setPokemonDetails(null);
+        setQuery('');
+        setScreen('games');
+      }
+    }),
     screen === 'games' && h(GamesView, { games, onOpenGame: openGame }),
+    screen === 'all-pokemon' && h(AllPokemonView, {
+      pokemon: filteredAllPokemon,
+      totalCount: allPokemonTotal || allPokemonList.length,
+      query,
+      onQuery: setQuery,
+      onOpenPokemon: openPokemon
+    }),
     screen === 'pokemon' && h(PokemonView, {
       game: selectedGame,
       versionGroup,

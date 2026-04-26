@@ -1,5 +1,5 @@
 ﻿{
-  "name": "Pokédex PWA",
+  "name": "Pokédex RGC",
   "short_name": "Pokédex",
   "description": "Consulte jogos oficiais, Pokémon disponíveis, evoluções e golpes por versão.",
   "start_url": "./index.html",

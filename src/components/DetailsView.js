@@ -2,7 +2,7 @@
 import { formatLocationName, formatName, idFromUrl, spriteForSpecies } from '../utils/format.js';
 import { formatEvolutionDetails, groupMovesByMethod } from '../utils/pokemonData.js';
 
-export function DetailsView({ pokemon, details, onOpenPokemon }) {
+export function DetailsView({ game, pokemon, details, onOpenPokemon }) {
   const [spriteMode, setSpriteMode] = useState('normal');
   if (!details) return h('section', { className: 'details-grid' });
 
@@ -62,17 +62,21 @@ export function DetailsView({ pokemon, details, onOpenPokemon }) {
     ),
     h('article', { className: 'panel encounters-panel' },
       h('div', { className: 'section-title' },
-        h('h2', null, 'Onde capturar'),
-        h('span', null, `${details.encounters.length} local(is)`)
+        h('h2', null, game ? 'Onde capturar' : 'Captura por jogo'),
+        h('span', null, game ? `${details.encounters.length} local(is)` : 'Escolha um jogo para ver rotas')
       ),
-      h(EncountersList, { encounters: details.encounters })
+      game
+        ? h(EncountersList, { encounters: details.encounters })
+        : h('p', { className: 'muted' }, 'A lista completa mostra dados gerais. Para locais de captura, entre pela tela de jogos e escolha uma versão.')
     ),
     h('article', { className: 'panel moves-panel' },
       h('div', { className: 'section-title' },
-        h('h2', null, 'Moves disponíveis'),
-        h('span', null, `${details.moves.length} registros`)
+        h('h2', null, game ? 'Moves disponíveis' : 'Moves por versão'),
+        h('span', null, game ? `${details.moves.length} registros` : 'Disponível ao abrir por jogo')
       ),
-      h(MovesTable, { moves: details.moves })
+      game
+        ? h(MovesTable, { moves: details.moves })
+        : h('p', { className: 'muted' }, 'Os moves mudam conforme a versão. Abra um jogo oficial para consultar os métodos de aprendizado corretos.')
     )
   );
 }

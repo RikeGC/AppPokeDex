@@ -1,0 +1,136 @@
+.home-screen {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 420px);
+  gap: 18px;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.home-copy,
+.home-showcase {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.home-copy {
+  display: grid;
+  align-content: center;
+  gap: 16px;
+  min-height: 420px;
+  padding: clamp(22px, 4vw, 42px);
+}
+
+.home-copy > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.home-kicker {
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.home-copy h2 {
+  width: 100%;
+  max-width: 760px;
+  margin: 0;
+  font-size: clamp(2.2rem, 6vw, 4.8rem);
+  line-height: 0.98;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+
+.home-copy p {
+  max-width: 650px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.03rem;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+.home-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.home-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+}
+
+.action-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.home-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.home-stats span {
+  display: grid;
+  min-width: 120px;
+  gap: 2px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-soft);
+  padding: 12px 14px;
+}
+
+.home-stats strong {
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.home-stats small {
+  color: var(--muted);
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.home-showcase {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 14px;
+}
+
+.showcase-pokemon {
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  min-height: 180px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, var(--panel-soft), var(--panel));
+}
+
+.showcase-pokemon img {
+  width: 112px;
+  height: 112px;
+  image-rendering: pixelated;
+}
+
+.showcase-pokemon strong {
+  font-size: 0.95rem;
+}
