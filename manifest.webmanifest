@@ -1,0 +1,39 @@
+﻿{
+  "name": "Pokédex PWA",
+  "short_name": "Pokédex",
+  "description": "Consulte jogos oficiais, Pokémon disponíveis, evoluções e golpes por versão.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#dc2626",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "./assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Abrir Pokédex",
+      "short_name": "Pokédex",
+      "url": "./index.html"
+    }
+  ]
+}
+

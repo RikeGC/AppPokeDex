@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Pokédex FireRed">
+  <rect width="512" height="512" rx="96" fill="#dc2626"/>
+  <path d="M64 250h384v44H64z" fill="#111827"/>
+  <path d="M64 294h384v122c0 35-29 64-64 64H128c-35 0-64-29-64-64z" fill="#f8fafc"/>
+  <circle cx="256" cy="272" r="88" fill="#111827"/>
+  <circle cx="256" cy="272" r="58" fill="#f8fafc"/>
+  <circle cx="256" cy="272" r="30" fill="#e2e8f0"/>
+  <circle cx="140" cy="136" r="42" fill="#38bdf8" stroke="#f8fafc" stroke-width="12"/>
+  <circle cx="220" cy="122" r="14" fill="#facc15"/>
+  <circle cx="270" cy="122" r="14" fill="#22c55e"/>
+  <circle cx="320" cy="122" r="14" fill="#f8fafc"/>
+</svg>

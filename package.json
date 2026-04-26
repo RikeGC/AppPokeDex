@@ -1,0 +1,9 @@
+{
+  "name": "app-pokedex-pwa",
+  "version": "1.0.0",
+  "private": true,
+  "description": "React PWA para consultar jogos oficiais, Pokémon disponíveis, evoluções e moves.",
+  "scripts": {
+    "start": "powershell -ExecutionPolicy Bypass -File ./serve.ps1"
+  }
+}
