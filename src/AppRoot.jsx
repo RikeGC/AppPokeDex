@@ -1,4 +1,4 @@
-import { h, useEffect, useMemo, useState } from './lib/react.js';
+import { useEffect, useMemo, useState } from 'react';
 import { apiGet, normalizeApiUrl } from './api/pokeapi.js';
 import {
   deletePackageMeta,
@@ -10,12 +10,13 @@ import {
 } from './api/offlineDb.js';
 import { cacheAssets, deleteCachedAssets } from './api/assetsCache.js';
 import { coverForGame } from './data/gameCovers.js';
-import { AllPokemonView } from './components/AllPokemonView.js';
-import { DetailsView } from './components/DetailsView.js';
-import { GamesView } from './components/GamesView.js';
-import { Header } from './components/Header.js';
-import { HomeView } from './components/HomeView.js';
-import { PokemonView } from './components/PokemonView.js';
+import { AllPokemonView } from './components/AllPokemonView.jsx';
+import { DetailsView } from './components/DetailsView.jsx';
+import { GamesView } from './components/GamesView.jsx';
+import { Header } from './components/Header.jsx';
+import { HomeView } from './components/HomeView.jsx';
+import { PokemonView } from './components/PokemonView.jsx';
+import { Settings } from './components/Settings.jsx';
 import { formatName, idFromUrl, spriteForSpecies } from './utils/format.js';
 import {
   extractEncountersForVersion,
@@ -32,6 +33,7 @@ export function AppRoot() {
   const [regionalPokemonList, setRegionalPokemonList] = useState([]);
   const [nationalPokemonList, setNationalPokemonList] = useState([]);
   const [allPokemonList, setAllPokemonList] = useState([]);
+  const [homeShowcase, setHomeShowcase] = useState([]);
   const [allPokemonTotal, setAllPokemonTotal] = useState(0);
   const [pokemonList, setPokemonList] = useState([]);
   const [selectedPokemon, setSelectedPokemon] = useState(null);
@@ -40,6 +42,7 @@ export function AppRoot() {
   const [error, setError] = useState('');
   const [query, setQuery] = useState('');
   const [offlinePackage, setOfflinePackage] = useState(null);
+  const [offlinePackages, setOfflinePackages] = useState([]);
   const [offlineProgress, setOfflineProgress] = useState(null);
   const [offlineMessage, setOfflineMessage] = useState('');
   const [installPrompt, setInstallPrompt] = useState(null);
@@ -48,6 +51,7 @@ export function AppRoot() {
   useEffect(() => {
     loadGames();
     loadPokemonTotal();
+    loadHomeShowcase();
 
     const handleInstallPrompt = (event) => {
       event.preventDefault();
@@ -81,6 +85,11 @@ export function AppRoot() {
   }, [selectedGame, dexMode, screen, pokemonList.length]);
 
   useEffect(() => {
+    if (screen !== 'settings') return;
+    refreshOfflinePackages();
+  }, [screen]);
+
+  useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
   }, [screen, selectedGame?.name, selectedPokemon?.name]);
 
@@ -110,6 +119,40 @@ export function AppRoot() {
       setAllPokemonTotal(data.count || 0);
     } catch (err) {
       setAllPokemonTotal(0);
+    }
+  }
+
+  function randomOffsets(total, count) {
+    const offsets = new Set();
+    while (offsets.size < Math.min(count, total)) {
+      offsets.add(Math.floor(Math.random() * total));
+    }
+    return Array.from(offsets);
+  }
+
+  async function loadHomeShowcase() {
+    try {
+      const summary = await apiGet('/pokemon-species?limit=1');
+      const offsets = randomOffsets(summary.count || 0, 4);
+      const entries = await Promise.all(offsets.map(async (offset) => {
+        const data = await apiGet(`/pokemon-species?limit=1&offset=${offset}`);
+        return data.results[0];
+      }));
+      setHomeShowcase(entries
+        .filter(Boolean)
+        .map((species) => {
+          const id = idFromUrl(species.url);
+          return {
+            id,
+            name: species.name,
+            label: formatName(species.name),
+            entryNumber: id,
+            speciesUrl: species.url
+          };
+        })
+        .filter((pokemon) => Number.isFinite(pokemon.id)));
+    } catch (err) {
+      setHomeShowcase([]);
     }
   }
 
@@ -170,27 +213,7 @@ export function AppRoot() {
     setPokemonList([]);
 
     try {
-      const version = await apiGet(game.url);
-      const group = await apiGet(version.version_group.url);
-      const pokedexes = await Promise.all(group.pokedexes.map((pokedex) => apiGet(pokedex.url)));
-      const entries = new Map();
-
-      pokedexes.forEach((pokedex) => {
-        pokedex.pokemon_entries.forEach((entry) => {
-          const species = entry.pokemon_species;
-          if (!entries.has(species.name)) {
-            entries.set(species.name, {
-              id: idFromUrl(species.url),
-              name: species.name,
-              label: formatName(species.name),
-              entryNumber: entry.entry_number,
-              speciesUrl: species.url
-            });
-          }
-        });
-      });
-
-      const regionalList = Array.from(entries.values()).sort((a, b) => a.entryNumber - b.entryNumber || a.id - b.id);
+      const { group, list: regionalList } = await loadRegionalPokemonForGame(game);
       setVersionGroup(group);
       setRegionalPokemonList(regionalList);
       setPokemonList(regionalList);
@@ -199,6 +222,33 @@ export function AppRoot() {
     } finally {
       setLoading('');
     }
+  }
+
+  async function loadRegionalPokemonForGame(game) {
+    const version = await apiGet(game.url);
+    const group = await apiGet(version.version_group.url);
+    const pokedexes = await Promise.all(group.pokedexes.map((pokedex) => apiGet(pokedex.url)));
+    const entries = new Map();
+
+    pokedexes.forEach((pokedex) => {
+      pokedex.pokemon_entries.forEach((entry) => {
+        const species = entry.pokemon_species;
+        if (!entries.has(species.name)) {
+          entries.set(species.name, {
+            id: idFromUrl(species.url),
+            name: species.name,
+            label: formatName(species.name),
+            entryNumber: entry.entry_number,
+            speciesUrl: species.url
+          });
+        }
+      });
+    });
+
+    return {
+      group,
+      list: Array.from(entries.values()).sort((a, b) => a.entryNumber - b.entryNumber || a.id - b.id)
+    };
   }
 
   async function changeDexMode(nextMode) {
@@ -258,30 +308,49 @@ export function AppRoot() {
     setOfflinePackage(await getPackageMeta(game.name, mode));
   }
 
+  async function refreshOfflinePackages() {
+    setOfflinePackages((await getAllPackageMeta()).sort((a, b) => b.downloadedAt - a.downloadedAt));
+  }
+
   async function downloadOfflinePackage() {
     if (!selectedGame || !versionGroup || pokemonList.length === 0 || offlineProgress) return;
+    await downloadOfflinePackageForGame(selectedGame, dexMode, versionGroup, pokemonList);
+  }
 
+  async function downloadOfflinePackageForGame(game, mode = 'regional', group = null, list = []) {
+    if (!game || offlineProgress) return;
+
+    let packageGroup = group;
+    let packageList = list;
     const urls = new Set();
     const assetUrls = new Set();
-    const list = pokemonList;
     const startedAt = Date.now();
     setOfflineMessage('');
-    setOfflineProgress({ done: 0, total: list.length, label: 'Preparando pacote offline...' });
+    setOfflineProgress({ done: 0, total: packageList.length || 1, label: 'Preparando pacote offline...' });
 
     try {
       urls.add(normalizeApiUrl('/version?limit=200'));
-      urls.add(normalizeApiUrl(selectedGame.url));
-      if (selectedGame.cover && !selectedGame.cover.startsWith('data:')) assetUrls.add(selectedGame.cover);
+      urls.add(normalizeApiUrl(game.url));
+      if (game.cover && !game.cover.startsWith('data:')) assetUrls.add(game.cover);
 
-      if (dexMode === 'national') {
-        const generationId = idFromUrl(versionGroup.generation.url);
+      if (!packageGroup || packageList.length === 0) {
+        const regionalData = await loadRegionalPokemonForGame(game);
+        packageGroup = regionalData.group;
+        packageList = regionalData.list;
+      }
+
+      if (mode === 'national') {
+        const generationId = idFromUrl(packageGroup.generation.url);
         for (let index = 1; index <= generationId; index += 1) {
           urls.add(normalizeApiUrl(`/generation/${index}`));
           await apiGet(`/generation/${index}`);
         }
+        packageList = await loadNationalDexUntilGeneration(packageGroup);
       }
 
-      const version = await apiGet(selectedGame.url);
+      setOfflineProgress({ done: 0, total: packageList.length, label: 'Preparando pacote offline...' });
+
+      const version = await apiGet(game.url);
       urls.add(normalizeApiUrl(version.version_group.url));
       const group = await apiGet(version.version_group.url);
       await Promise.all(group.pokedexes.map(async (pokedex) => {
@@ -289,9 +358,9 @@ export function AppRoot() {
         await apiGet(pokedex.url);
       }));
 
-      for (let index = 0; index < list.length; index += 1) {
-        const item = list[index];
-        setOfflineProgress({ done: index, total: list.length, label: `Baixando ${item.label}...` });
+      for (let index = 0; index < packageList.length; index += 1) {
+        const item = packageList[index];
+        setOfflineProgress({ done: index, total: packageList.length, label: `Baixando ${item.label}...` });
 
         urls.add(normalizeApiUrl(item.speciesUrl));
         const species = await apiGet(item.speciesUrl);
@@ -313,19 +382,20 @@ export function AppRoot() {
 
       await cacheAssets(Array.from(assetUrls));
       const meta = {
-        id: packageKey(selectedGame.name, dexMode),
-        gameName: selectedGame.name,
-        gameLabel: selectedGame.label,
-        dexMode,
-        count: list.length,
+        id: packageKey(game.name, mode),
+        gameName: game.name,
+        gameLabel: game.label,
+        dexMode: mode,
+        count: packageList.length,
         urls: Array.from(urls),
         assets: Array.from(assetUrls),
         downloadedAt: Date.now(),
         elapsedMs: Date.now() - startedAt
       };
       await savePackageMeta(meta);
-      setOfflinePackage(meta);
-      setOfflineMessage(`${selectedGame.label} (${dexMode === 'regional' ? 'Regional' : 'National Dex'}) salvo para offline.`);
+      if (selectedGame?.name === game.name && dexMode === mode) setOfflinePackage(meta);
+      await refreshOfflinePackages();
+      setOfflineMessage(`${game.label} (${mode === 'regional' ? 'Regional' : 'National Dex'}) salvo para offline.`);
     } catch (err) {
       setOfflineMessage('Não foi possível concluir o download offline. Confira a conexão e tente novamente.');
     } finally {
@@ -334,17 +404,42 @@ export function AppRoot() {
   }
 
   async function removeOfflinePackage() {
-    if (!selectedGame || !offlinePackage || offlineProgress) return;
+    if (!offlinePackage) return;
+    await removeOfflinePackageByMeta(offlinePackage);
+  }
+
+  async function removeOfflinePackageByMeta(packageMeta) {
+    if (!packageMeta || offlineProgress) return;
 
     setOfflineMessage('Removendo pacote offline...');
-    const otherPackages = (await getAllPackageMeta()).filter((item) => item.id !== offlinePackage.id);
+    await deleteOfflinePackage(packageMeta);
+    if (offlinePackage?.id === packageMeta.id) setOfflinePackage(null);
+    await refreshOfflinePackages();
+    setOfflineMessage('Pacote offline removido.');
+  }
+
+  async function removeOfflinePackagesForGame(game) {
+    if (!game || offlineProgress) return;
+
+    const gamePackages = (await getAllPackageMeta()).filter((item) => item.gameName === game.name);
+    if (gamePackages.length === 0) return;
+
+    setOfflineMessage('Removendo pacote offline...');
+    for (const packageMeta of gamePackages) {
+      await deleteOfflinePackage(packageMeta);
+    }
+    if (gamePackages.some((item) => item.id === offlinePackage?.id)) setOfflinePackage(null);
+    await refreshOfflinePackages();
+    setOfflineMessage('Pacote offline removido.');
+  }
+
+  async function deleteOfflinePackage(packageMeta) {
+    const otherPackages = (await getAllPackageMeta()).filter((item) => item.id !== packageMeta.id);
     const sharedUrls = new Set(otherPackages.flatMap((item) => item.urls || []));
     const sharedAssets = new Set(otherPackages.flatMap((item) => item.assets || []));
-    await deleteStoredResponses((offlinePackage.urls || []).filter((url) => !sharedUrls.has(url)));
-    await deleteCachedAssets((offlinePackage.assets || []).filter((url) => !sharedAssets.has(url)));
-    await deletePackageMeta(selectedGame.name, dexMode);
-    setOfflinePackage(null);
-    setOfflineMessage('Pacote offline removido.');
+    await deleteStoredResponses((packageMeta.urls || []).filter((url) => !sharedUrls.has(url)));
+    await deleteCachedAssets((packageMeta.assets || []).filter((url) => !sharedAssets.has(url)));
+    await deletePackageMeta(packageMeta.gameName, packageMeta.dexMode);
   }
 
   async function installApp() {
@@ -375,7 +470,7 @@ export function AppRoot() {
       setScreen('games');
       return;
     }
-    if (screen === 'all-pokemon' || screen === 'games') {
+    if (screen === 'all-pokemon' || screen === 'games' || screen === 'settings') {
       setScreen('home');
     }
   }
@@ -392,61 +487,94 @@ export function AppRoot() {
     setScreen('home');
   }
 
-  return h('main', { className: 'app-shell' },
-    h(Header, {
-      screen,
-      selectedGame,
-      selectedPokemon,
-      installPrompt,
-      theme,
-      onThemeToggle: () => setTheme((current) => current === 'dark' ? 'light' : 'dark'),
-      onInstall: installApp,
-      onHome: goHome,
-      onBack: goBack,
-      onBackToPokemon: () => setScreen('pokemon')
-    }),
-    error && h('section', { className: 'status error' }, error),
-    loading && h('section', { className: 'status' }, loading),
-    screen === 'home' && h(HomeView, {
-      gamesCount: games.length,
-      allPokemonCount: allPokemonTotal || allPokemonList.length,
-      onOpenAllPokemon: openAllPokemon,
-      onOpenGames: () => {
-        setSelectedGame(null);
-        setSelectedPokemon(null);
-        setPokemonDetails(null);
-        setQuery('');
-        setScreen('games');
-      }
-    }),
-    screen === 'games' && h(GamesView, { games, onOpenGame: openGame }),
-    screen === 'all-pokemon' && h(AllPokemonView, {
-      pokemon: filteredAllPokemon,
-      totalCount: allPokemonTotal || allPokemonList.length,
-      query,
-      onQuery: setQuery,
-      onOpenPokemon: openPokemon
-    }),
-    screen === 'pokemon' && h(PokemonView, {
-      game: selectedGame,
-      versionGroup,
-      dexMode,
-      pokemon: filteredPokemon,
-      query,
-      offlinePackage,
-      offlineProgress,
-      offlineMessage,
-      onQuery: setQuery,
-      onDexModeChange: changeDexMode,
-      onDownloadOffline: downloadOfflinePackage,
-      onRemoveOffline: removeOfflinePackage,
-      onOpenPokemon: openPokemon
-    }),
-    screen === 'details' && h(DetailsView, {
-      game: selectedGame,
-      pokemon: selectedPokemon,
-      details: pokemonDetails,
-      onOpenPokemon: openPokemon
-    })
+  function goToGames() {
+    setSelectedGame(null);
+    setVersionGroup(null);
+    setSelectedPokemon(null);
+    setPokemonDetails(null);
+    setQuery('');
+    setScreen('games');
+  }
+
+  function openSettings() {
+    setScreen('settings');
+  }
+
+  return (
+    <main className="app-shell">
+      <Header
+        screen={screen}
+        selectedGame={selectedGame}
+        selectedPokemon={selectedPokemon}
+        installPrompt={installPrompt}
+        theme={theme}
+        onThemeToggle={() => setTheme((current) => current === 'dark' ? 'light' : 'dark')}
+        onInstall={installApp}
+        onHome={goHome}
+        onBack={goBack}
+        onGoToGames={goToGames}
+        onOpenSettings={openSettings}
+        onBackToPokemon={() => setScreen('pokemon')}
+      />
+      {error && <section className="status error">{error}</section>}
+      {loading && <section className="status">{loading}</section>}
+      {screen === 'home' && (
+        <HomeView
+          pokemon={homeShowcase}
+          gamesCount={games.length}
+          allPokemonCount={allPokemonTotal || allPokemonList.length}
+          onOpenAllPokemon={openAllPokemon}
+          onOpenGames={() => {
+            setSelectedGame(null);
+            setSelectedPokemon(null);
+            setPokemonDetails(null);
+            setQuery('');
+            setScreen('games');
+          }}
+        />
+      )}
+      {screen === 'games' && <GamesView games={games} onOpenGame={openGame} />}
+      {screen === 'all-pokemon' && (
+        <AllPokemonView
+          pokemon={filteredAllPokemon}
+          totalCount={allPokemonTotal || allPokemonList.length}
+          query={query}
+          onQuery={setQuery}
+          onOpenPokemon={openPokemon}
+        />
+      )}
+      {screen === 'pokemon' && (
+        <PokemonView
+          game={selectedGame}
+          versionGroup={versionGroup}
+          dexMode={dexMode}
+          pokemon={filteredPokemon}
+          query={query}
+          onQuery={setQuery}
+          onDexModeChange={changeDexMode}
+          onOpenPokemon={openPokemon}
+        />
+      )}
+      {screen === 'settings' && (
+        <Settings
+          theme={theme}
+          onThemeToggle={() => setTheme((current) => current === 'dark' ? 'light' : 'dark')}
+          games={games}
+          offlinePackages={offlinePackages}
+          offlineProgress={offlineProgress}
+          offlineMessage={offlineMessage}
+          onDownloadOfflineGame={(game) => downloadOfflinePackageForGame(game)}
+          onRemoveOfflineGame={removeOfflinePackagesForGame}
+        />
+      )}
+      {screen === 'details' && (
+        <DetailsView
+          game={selectedGame}
+          pokemon={selectedPokemon}
+          details={pokemonDetails}
+          onOpenPokemon={openPokemon}
+        />
+      )}
+    </main>
   );
 }

@@ -122,6 +122,71 @@
   padding: 0 12px;
 }
 
+.pokemon-toolbar {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto;
+  align-items: center;
+}
+
+.pokemon-toolbar input {
+  grid-column: 1 / -1;
+}
+
+.dex-toggle-bar {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.toolbar .dex-toggle-bar {
+  display: inline-flex;
+}
+
+.dex-count {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.dex-context {
+  justify-self: end;
+  text-align: right;
+}
+
+.dex-toggle {
+  display: flex;
+  max-height: 34px;
+  padding: 3px;
+  gap: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--color-surface-secondary, #f0f0f0);
+}
+
+.toolbar .dex-toggle {
+  display: flex;
+  gap: 0;
+}
+
+.dex-toggle-btn {
+  flex: 1;
+  border: none;
+  border-radius: 999px;
+  padding: 4px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+.dex-toggle-btn.is-active {
+  background: var(--color-surface, #fff);
+  color: var(--text);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
 .offline-panel {
   display: grid;
   grid-template-columns: minmax(220px, 1fr) auto auto;
@@ -194,5 +259,108 @@
 .segmented-control button.is-active {
   background: var(--accent);
   color: #fff;
+}
+
+.settings-screen {
+  gap: 12px;
+}
+
+.settings-panel {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+}
+
+.settings-panel h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.settings-panel p {
+  margin: 0;
+}
+
+.settings-row,
+.settings-game-item,
+.offline-package-item,
+.settings-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.settings-row > div,
+.settings-game-item > div,
+.offline-package-item > div {
+  display: grid;
+  gap: 4px;
+}
+
+.settings-theme-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.offline-package-list {
+  display: grid;
+  gap: 8px;
+}
+
+.settings-game-list {
+  display: grid;
+  gap: 0;
+  max-height: 420px;
+  overflow: auto;
+  border-top: 1px solid var(--border);
+}
+
+.settings-game-item {
+  min-height: 44px;
+  border-bottom: 1px solid var(--border);
+  padding: 7px 0;
+}
+
+.settings-game-item strong {
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.settings-game-item .ghost-button {
+  min-height: 32px;
+  padding: 0 12px;
+}
+
+.offline-package-item {
+  min-height: 54px;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+
+.settings-empty {
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+
+.settings-progress {
+  min-width: 0;
+}
+
+.settings-actions {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
+.settings-meta {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.92rem;
 }
 

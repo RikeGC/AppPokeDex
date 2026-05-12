@@ -238,6 +238,23 @@
     min-height: 46px;
   }
 
+  .pokemon-toolbar {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .settings-row,
+  .offline-package-item,
+  .settings-actions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .dex-context {
+    justify-self: start;
+    text-align: left;
+  }
+
   .offline-panel {
     grid-template-columns: 1fr;
     align-items: stretch;

@@ -4,6 +4,17 @@
   "private": true,
   "description": "React PWA para consultar jogos oficiais, Pokémon disponíveis, evoluções e moves.",
   "scripts": {
-    "start": "powershell -ExecutionPolicy Bypass -File ./serve.ps1"
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.4.1",
+    "vite": "^5.4.21"
   }
 }
