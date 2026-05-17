@@ -284,50 +284,92 @@
 
   .details-grid {
     grid-template-columns: 1fr;
-    gap: 10px;
+    gap: 12px;
     min-width: 0;
     overflow-x: hidden;
   }
 
   .panel {
-    padding: 12px;
+    padding: 14px;
     box-shadow: none;
     overflow: hidden;
   }
 
   .profile-panel {
-    grid-template-columns: 132px minmax(0, 1fr);
-    align-items: start;
+    position: relative;
+    grid-template-columns: 104px minmax(0, 1fr);
+    align-items: center;
     justify-items: stretch;
+    gap: 10px;
+    min-height: 0;
+    padding: 10px;
     text-align: left;
   }
 
   .profile-media {
-    gap: 8px;
+    position: relative;
+    gap: 0;
   }
 
   .sprite-preview {
-    width: 124px;
-    height: 124px;
+    width: 104px;
+    height: 104px;
   }
 
   .sprite-preview img {
-    width: 116px;
-    height: 116px;
+    width: 98px;
+    height: 98px;
   }
 
   .sprite-toggle {
-    width: 124px;
+    position: absolute;
+    right: 4px;
+    top: 4px;
+    width: 58px;
+    min-height: 26px;
+    background: color-mix(in srgb, var(--panel) 82%, transparent);
+    backdrop-filter: blur(8px);
   }
 
   .sprite-toggle button {
-    min-height: 34px;
-    padding: 0 4px;
-    font-size: 0.78rem;
+    min-height: 26px;
+    padding: 0 2px;
+    font-size: 0.72rem;
+  }
+
+  .sprite-icon {
+    width: 15px;
+    height: 15px;
+  }
+
+  .sprite-icon-normal::before {
+    inset: 3px;
+  }
+
+  .profile-info,
+  .profile-heading {
+    gap: 5px;
+    min-width: 0;
+  }
+
+  .profile-heading h2 {
+    font-size: 1.25rem;
+    line-height: 1.05;
+  }
+
+  .profile-heading .kicker {
+    font-size: 0.68rem;
+  }
+
+  .profile-heading .badge {
+    min-height: 22px;
+    padding: 0 7px;
+    font-size: 0.72rem;
   }
 
   .pokemon-facts {
     grid-column: auto;
+    gap: 6px;
   }
 
   .fact-grid {
@@ -335,7 +377,23 @@
   }
 
   .fact-card {
-    padding: 8px;
+    padding: 7px;
+  }
+
+  .best-stat-card {
+    gap: 5px;
+  }
+
+  .best-stat-heading strong {
+    font-size: 0.82rem;
+  }
+
+  .best-stat-heading b {
+    font-size: 0.88rem;
+  }
+
+  .best-stat-meter {
+    height: 6px;
   }
 
   .badge-row {
@@ -356,45 +414,110 @@
   }
 
   .evolution-tree {
-    width: calc(100vw - 48px);
+    width: 100%;
     max-width: 100%;
     margin: 0;
-    padding: 12px 0 6px;
-    scroll-snap-type: x proximity;
+    padding: 8px 0 0;
     border-radius: 8px;
   }
 
+  .evolution-node,
+  .evolution-children,
+  .evolution-branch {
+    width: 100%;
+  }
+
+  .evolution-node {
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .evolution-stage {
+    width: 100%;
+  }
+
   .evolution-card {
-    min-width: 104px;
-    max-width: 104px;
-    padding: 8px;
-    scroll-snap-align: start;
+    grid-template-columns: 52px minmax(0, 1fr);
+    grid-template-areas:
+      "sprite name"
+      "sprite types"
+      "sprite condition";
+    align-items: center;
+    justify-items: start;
+    align-content: center;
+    width: min(100%, 300px);
+    min-height: 0;
+    gap: 2px 8px;
+    padding: 7px 9px;
+    text-align: left;
   }
 
   .evolution-card img {
-    width: 58px;
-    height: 58px;
+    grid-area: sprite;
+    width: 52px;
+    height: 52px;
+    align-self: center;
+    justify-self: center;
   }
 
-  .evolution-condition {
-    max-width: 104px;
-    padding: 5px 8px;
-    font-size: 0.76rem;
+  .evolution-card-name {
+    grid-area: name;
+    min-width: 0;
+    max-width: 100%;
+    font-size: 0.875rem;
+    line-height: 1.1;
     overflow-wrap: anywhere;
   }
 
-  .evolution-node,
+  .evolution-type-row {
+    grid-area: types;
+    justify-content: flex-start;
+    gap: 4px;
+    min-height: 20px;
+  }
+
+  .evolution-type-row .badge {
+    min-height: 19px;
+    padding: 0 6px;
+    font-size: 0.68rem;
+  }
+
+  .evolution-condition {
+    grid-area: condition;
+    max-width: 100%;
+    width: auto;
+    margin-top: 1px;
+    padding: 3px 6px;
+    font-size: 0.68rem;
+    line-height: 1.15;
+  }
+
   .evolution-children {
-    gap: 8px;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
   }
 
   .evolution-branch {
-    gap: 6px;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
   }
 
-  .evolution-branch::before {
-    width: 16px;
-    margin-top: 31px;
+  .evolution-connector {
+    width: 2px;
+    height: 14px;
+    margin: 0;
+    flex-basis: 14px;
+    opacity: 0.72;
+  }
+
+  .evolution-connector::after {
+    right: 50%;
+    top: auto;
+    bottom: -1px;
+    transform: translateX(50%) rotate(135deg);
   }
 
   .encounter-card div:first-child {
@@ -410,17 +533,17 @@
 
   .move-tabs {
     flex-wrap: nowrap;
-    gap: 6px;
-    margin: 10px -12px;
+    gap: 2px;
+    margin: 8px -4px 4px;
     overflow-x: auto;
-    padding: 0 12px 4px;
+    padding: 0 4px;
   }
 
   .move-tabs button {
     flex: 0 0 auto;
-    min-height: 32px;
-    padding: 0 9px;
-    font-size: 0.78rem;
+    min-height: 28px;
+    padding: 0 7px;
+    font-size: 0.72rem;
     white-space: nowrap;
   }
 
@@ -428,6 +551,34 @@
     margin: 0;
     width: 100%;
     padding: 0;
+  }
+
+  .moves-version-title {
+    align-items: stretch;
+  }
+
+  .version-select {
+    width: 100%;
+    min-height: 36px;
+    font-size: 0.82rem;
+  }
+
+  .compact-moves-table table {
+    min-width: 0;
+  }
+
+  .compact-moves-table th,
+  .compact-moves-table td {
+    padding: 7px 6px;
+  }
+
+  .compact-moves-table td {
+    height: 36px;
+    font-size: 0.8rem;
+  }
+
+  .compact-moves-table th {
+    font-size: 0.66rem;
   }
 
   table {
@@ -459,21 +610,27 @@
   }
 
   .profile-panel {
-    grid-template-columns: 116px minmax(0, 1fr);
-  }
-
-  .sprite-preview,
-  .sprite-toggle {
-    width: 108px;
+    grid-template-columns: 100px minmax(0, 1fr);
+    justify-items: stretch;
+    text-align: left;
   }
 
   .sprite-preview {
-    height: 108px;
+    width: 100px;
+    height: 100px;
+  }
+
+  .sprite-toggle {
+    width: 56px;
   }
 
   .sprite-preview img {
-    width: 100px;
-    height: 100px;
+    width: 94px;
+    height: 94px;
+  }
+
+  .badge-row {
+    justify-content: flex-start;
   }
 
   .fact-card span {

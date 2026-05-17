@@ -1,6 +1,7 @@
 import packageInfo from '../../package.json';
 import { formatDate } from '../utils/format.js';
 import { Icon } from './Icon.jsx';
+import { SectionCard } from './SectionCard.jsx';
 
 export function Settings({
   theme,
@@ -16,8 +17,7 @@ export function Settings({
 
   return (
     <section className="content-stack settings-screen">
-      <section className="panel settings-panel">
-        <h2>Aparência</h2>
+      <SectionCard className="settings-panel" title="Aparência">
         <div className="settings-row">
           <div>
             <strong>Modo de cor</strong>
@@ -28,12 +28,13 @@ export function Settings({
             <span>{theme === 'dark' ? 'Modo claro' : 'Modo escuro'}</span>
           </button>
         </div>
-      </section>
+      </SectionCard>
 
-      <section className="panel settings-panel">
-        <h2>Dados offline</h2>
-        <p className="muted">Dados offline permitem abrir o app sem consultar a API toda vez.</p>
-
+      <SectionCard
+        className="settings-panel"
+        title="Dados offline"
+        subtitle="Dados offline permitem abrir o app sem consultar a API toda vez."
+      >
         <div className="settings-game-list">
           {games.map((game) => {
             const cachedPackage = cachedByGame.get(game.name);
@@ -69,16 +70,15 @@ export function Settings({
         )}
 
         {offlineMessage && <p className="muted offline-message">{offlineMessage}</p>}
-      </section>
+      </SectionCard>
 
-      <section className="panel settings-panel">
-        <h2>Sobre</h2>
+      <SectionCard className="settings-panel" title="Sobre">
         <div className="settings-meta">
           <span>Pokédex RGC</span>
           <span>{`Versão ${packageInfo.version}`}</span>
           <span>Repositório não informado</span>
         </div>
-      </section>
+      </SectionCard>
     </section>
   );
 }

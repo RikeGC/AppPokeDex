@@ -15,16 +15,40 @@
 .pokemon-card,
 .panel {
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--card-radius);
   background: var(--panel);
-  box-shadow: var(--shadow);
+  box-shadow: var(--card-shadow);
+}
+
+.section-card {
+  display: grid;
+  gap: var(--card-gap);
+  padding: var(--card-padding);
+}
+
+.section-card-header > div {
+  display: grid;
+  gap: 2px;
+}
+
+.section-card-header h2 {
+  margin: 0;
+  font-size: var(--section-title-size);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.section-card-header span {
+  color: var(--muted);
+  font-size: var(--section-subtitle-size);
+  font-weight: 700;
 }
 
 .game-card,
 .pokemon-card {
   display: flex;
   min-height: 132px;
-  padding: 16px;
+  padding: var(--card-padding);
   color: var(--text);
   text-align: left;
 }
@@ -96,9 +120,10 @@
 
 .toolbar {
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--card-radius);
   background: var(--panel);
-  padding: 14px;
+  box-shadow: var(--card-shadow);
+  padding: var(--card-padding);
   flex-wrap: wrap;
 }
 
@@ -193,9 +218,10 @@
   align-items: center;
   gap: 12px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--card-radius);
   background: var(--panel);
-  padding: 14px;
+  box-shadow: var(--card-shadow);
+  padding: var(--card-padding);
 }
 
 .offline-panel > div:first-child {
@@ -267,8 +293,7 @@
 
 .settings-panel {
   display: grid;
-  gap: 14px;
-  padding: 16px;
+  gap: var(--card-gap);
 }
 
 .settings-panel h2 {
@@ -316,12 +341,12 @@
   gap: 0;
   max-height: 420px;
   overflow: auto;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--row-separator);
 }
 
 .settings-game-item {
   min-height: 44px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--row-separator);
   padding: 7px 0;
 }
 
@@ -337,12 +362,12 @@
 
 .offline-package-item {
   min-height: 54px;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--row-separator);
   padding-top: 10px;
 }
 
 .settings-empty {
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--row-separator);
   padding-top: 10px;
 }
 
@@ -353,7 +378,7 @@
 .settings-actions {
   justify-content: flex-start;
   flex-wrap: wrap;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--row-separator);
   padding-top: 12px;
 }
 

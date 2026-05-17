@@ -9,6 +9,14 @@
   --accent-dark: #b91c1c;
   --accent-soft: #fef2f2;
   --shadow: 0 12px 28px rgba(16, 24, 39, 0.06);
+  /* Section/card design tokens: canonical compact card pattern used across detail, moves and capture surfaces. */
+  --card-radius: 8px;
+  --card-padding: 14px;
+  --card-gap: 10px;
+  --card-shadow: 0 8px 22px rgba(16, 24, 39, 0.055);
+  --section-title-size: 1rem;
+  --section-subtitle-size: 0.76rem;
+  --row-separator: color-mix(in srgb, var(--border) 78%, transparent);
   color-scheme: light;
 }
 
@@ -23,6 +31,8 @@
   --accent-dark: #ef4444;
   --accent-soft: rgba(248, 113, 113, 0.14);
   --shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+  --card-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
+  --row-separator: color-mix(in srgb, var(--border) 82%, transparent);
   color-scheme: dark;
 }
 

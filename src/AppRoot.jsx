@@ -24,6 +24,13 @@ import {
   loadNationalDexUntilGeneration
 } from './utils/pokemonData.js';
 
+function collectEvolutionSpecies(chain, list = []) {
+  if (!chain) return list;
+  list.push(chain.species.name);
+  chain.evolves_to.forEach((child) => collectEvolutionSpecies(child, list));
+  return list;
+}
+
 export function AppRoot() {
   const [screen, setScreen] = useState('home');
   const [games, setGames] = useState([]);
@@ -292,11 +299,28 @@ export function AppRoot() {
       const species = await apiGet(pokemon.speciesUrl);
       const pokemonData = await apiGet(`/pokemon/${species.name}`);
       const evolutionChain = await apiGet(species.evolution_chain.url);
+      const evolutionPokemonEntries = await Promise.all(
+        Array.from(new Set(collectEvolutionSpecies(evolutionChain.chain))).map(async (speciesName) => {
+          try {
+            const data = speciesName === pokemonData.name ? pokemonData : await apiGet(`/pokemon/${speciesName}`);
+            return [speciesName, data];
+          } catch (err) {
+            return [speciesName, null];
+          }
+        })
+      );
+      const rawEncounters = await apiGet(pokemonData.location_area_encounters);
       const moves = versionGroup ? extractMovesForVersionGroup(pokemonData.moves, versionGroup.name) : [];
-      const encounters = selectedGame
-        ? extractEncountersForVersion(await apiGet(pokemonData.location_area_encounters), selectedGame.name)
-        : [];
-      setPokemonDetails({ species, pokemon: pokemonData, evolutionChain, moves, encounters });
+      const encounters = selectedGame ? extractEncountersForVersion(rawEncounters, selectedGame.name) : [];
+      setPokemonDetails({
+        species,
+        pokemon: pokemonData,
+        evolutionChain,
+        evolutionPokemon: Object.fromEntries(evolutionPokemonEntries),
+        rawEncounters,
+        moves,
+        encounters
+      });
     } catch (err) {
       setError(err.message);
     } finally {
